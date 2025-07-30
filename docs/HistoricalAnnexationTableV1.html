@@ -105,8 +105,30 @@
         myTable.startup();
 
         var search = new Search({
-          map: null
-        }, dom.byId("search"));
+            map: myFeatureLayer
+         }, dom.byId("search"));
+
+        var sources = search.get("sources");
+
+        sources.push({
+           featureLayer: new   FeatureLayer("https://portal.gio.georgia.gov/server/rest/services/Hosted/Historic_Annexations/FeatureServer/0"),
+           searchFields: ["city","county"],
+           suggestionTemplate: "${city}: ${county}",
+           exactMatch: false,
+           name: "Search by city",
+           outFields: ["*"],
+           placeholder: "Search by city",
+           maxResults: 4,
+           maxSuggestions: 3,
+           enableSuggestions: true,
+           minCharacters: 2
+        });
+
+    //Set the sources above to the search widget
+        search.set("sources", sources);
+
+        myTable.startup();
+
         search.startup();
       });
     });
