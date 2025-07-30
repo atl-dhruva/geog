@@ -150,7 +150,7 @@
             refreshTable();
             return;
           }
-          // Filter for exact match (use LIKE for partial, = for exact)
+          // Use proper field names: City, County (case-sensitive)
           var city = e.result.feature.attributes.City;
           var county = e.result.feature.attributes.County;
           var expr = "";
@@ -176,7 +176,7 @@
             refreshTable();
             return;
           }
-          // Filter for partial match in City or County
+          // Use proper field names: City, County (case-sensitive)
           var expr = "City LIKE '%" + safeVal + "%' OR County LIKE '%" + safeVal + "%'";
           myFeatureLayer.setDefinitionExpression(expr);
           refreshTable();
