@@ -57,9 +57,10 @@
       "esri/dijit/Search",
       "dojo/dom",
       "dojo/io-query",
-      "dojo/ready"],
-       function (FeatureLayer, FeatureTable, Search, dom, ioQuery, ready
-      ) {
+      "dojo/ready"
+    ], function (
+      FeatureLayer, FeatureTable, Search, dom, ioQuery, ready
+    ) {
 
       function getAnchor() {
         var currentUrl = document.URL,
@@ -99,15 +100,13 @@
         var myTable = new FeatureTable({
           featureLayer: myFeatureLayer,
           showGridMenu: true,
-          hiddenFields: options.hiddenFields.split(',') // fields to hide on startup
+          hiddenFields: options.hiddenFields.split(',')
         }, "myTableNode");
-
         myTable.startup();
 
         var search = new Search({
-          map: null // No map, just the table
+          map: null
         }, dom.byId("search"));
-
         search.startup();
       });
     });
