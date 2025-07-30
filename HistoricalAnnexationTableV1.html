@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>DCA Historical Annexations Table</title>
+  <link rel="stylesheet" href="https://js.arcgis.com/3.21/dijit/themes/claro/claro.css">
+  <link rel="stylesheet" href="https://js.arcgis.com/3.21/esri/css/esri.css">
+  <script src="https://js.arcgis.com/3.21/"></script>
+
+  <style>
+    html,
+    body,
+    #myTableNode {
+      width:100%;
+      height:100%;
+      margin:0;
+      padding:0;
+      font-family: "Arial", sans-serif;
+    }
+
+    #top,
+    #bot {
+      margin: 0;
+      padding: 0;
+    }
+    .esri-feature-table-menu {
+        background-color: #fff !important;
+        color:#fff !important;
+    }
+    th[role="columnheader"] {
+        background-color: rgb(32, 60, 76) !important;
+        color: #fff !important;
+        border-bottom: 2px solid #8DD3EE !important;
+    }
+    #search {
+       display: block;
+       position: absolute;
+       z-index: 3;
+       top: 20px;
+       left: 75px;
+     }
+  </style>
+
+  <script>
+
+    require([
+      "esri/layers/FeatureLayer",
+      "esri/dijit/FeatureTable",
+      "esri/dijit/search"
+      "dojo/dom",
+      "dojo/parser",
+      "dojo/io-query",
+      "dojo/ready",
+      "esri/map",
+      "esri/dijit/Search",
+      "esri/geometry/Extent",
+      "esri/graphic",
+      "esri/symbols/SimpleMarkerSymbol",
+      "esri/geometry/screenUtils",
+      "dojo/dom",
+      "dojo/dom-construct",
+      "dojo/query",
+      "dojo/_base/Color"
+      ], function (Map, Search, Extent, Graphic, SimpleMarkerSymbol, screenUtils, dom, domConstruct, query, Color,
+      FeatureLayer, FeatureTable,
+      parser, ioQuery, ready
+    ) {
+
+      function getAnchor() {
+          var currentUrl = document.URL,
+      	  urlParts   = currentUrl.split('#');
+
+          return (urlParts.length > 1) ? urlParts[1] : null;
+      }
+      function getQuery() {
+        return dojo.doc.location.search.slice(1)
+      }
+      function getOptions() {
+        var params = getAnchor();
+        if(params === null) {
+          params = getQuery();
+        }
+
+        return ioQuery.queryToObject(decodeURIComponent(params));
+      }
+
+      parser.parse();
+
+      ready(function(){
+
+        var options = getOptions();
+
+        // Create the feature layer
+        var myFeatureLayer = new FeatureLayer(options.url, {
+          mode: FeatureLayer.MODE_ONDEMAND,
+          outFields:  options.outFields.split(','),
+          visible: true,
+          id: "fLayer"
+        });
+
+        var myTable = new FeatureTable({
+          featureLayer : myFeatureLayer,
+          showGridMenu: true,
+          hiddenFields: options.hiddenFields.split(',')  // field that end-user can show, but is hidden on startup
+        }, "myTableNode");
+
+        var search = new Search({
+            map: myFeatureLayer
+         }, dom.byId("search"));
+
+        var sources = search.get("sources");
+
+        sources.push({
+           featureLayer: new   FeatureLayer("https://portal.gio.georgia.gov/server/rest/services/Hosted/Historic_Annexations/FeatureServer/0"),
+           searchFields: ["city","county"],
+           suggestionTemplate: "${city}: ${county}",
+           exactMatch: false,
+           name: "Search by city",
+           outFields: ["*"],
+           placeholder: "Search by city",
+           maxResults: 4,
+           maxSuggestions: 3,
+           enableSuggestions: true,
+           minCharacters: 2
+        });
+
+    //Set the sources above to the search widget
+        search.set("sources", sources);
+
+        myTable.startup();
+
+        search.startup();
+      });
+    });
+  </script>
+</head>
+
+<body class="claro esri">
+  <div data-dojo-type="dijit/layout/BorderContainer" data-dojo-props="design:'headline', gutters: false" style="width:100%; height:100%;">
+    <div id="top" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'top'">
+    </div>
+    <div id="bot" data-dojo-type="dijit/layout/ContentPane" data-dojo-props="region:'center'">
+      <div id="myTableNode"></div>
+          <div id="search"></div>
+    </div>
+  </div>
+</body>
+
+</html>
