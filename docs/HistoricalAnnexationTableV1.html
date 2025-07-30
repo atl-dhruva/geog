@@ -135,11 +135,11 @@
           if (sourceName === "City") {
             var city = e.result.feature.attributes.City;
             var safeCity = city ? city.replace(/'/g, "''") : "";
-            filterExpr = "City = '" + safeCity + "'";
+            filterExpr = "city = '" + safeCity + "'";
           } else if (sourceName === "County") {
             var county = e.result.feature.attributes.County;
             var safeCounty = county ? county.replace(/'/g, "''") : "";
-            filterExpr = "County = '" + safeCounty + "'";
+            filterExpr = "county = '" + safeCounty + "'";
           }
           myFeatureLayer.setDefinitionExpression(filterExpr);
         });
@@ -153,7 +153,7 @@
           }
           var safeVal = escapeSQL(searchTerm.trim());
           // Combined logic: match City OR County (partial match)
-          var expr = "City LIKE '%" + safeVal + "%' OR County LIKE '%" + safeVal + "%'";
+          var expr = "city LIKE '%" + safeVal + "%' OR county LIKE '%" + safeVal + "%'";
           myFeatureLayer.setDefinitionExpression(expr);
         });
 
