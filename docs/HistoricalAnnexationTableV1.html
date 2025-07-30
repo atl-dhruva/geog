@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html>
-
 <head>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
   <title>DCA Historical Annexations Table</title>
@@ -8,9 +7,7 @@
   <link rel="stylesheet" href="https://js.arcgis.com/3.21/esri/css/esri.css">
   <script src="https://js.arcgis.com/3.21/"></script>
   <style>
-    html,
-    body,
-    #myTableNode {
+    html, body, #myTableNode {
       width: 100%;
       height: 100%;
       margin: 0;
@@ -35,11 +32,10 @@
     }
   </style>
 </head>
-
 <body class="claro">
   <div id="searchBarContainer">
     <span style="font-size: 1em; color: #203c4c; margin-right:8px;">Search City or County:</span>
-    <div id="search" style="display:inline-block; width:200px;"></div>
+    <div id="search" style="display:inline-block;"></div>
   </div>
   <div id="myTableNode"></div>
 
@@ -50,10 +46,9 @@
       "esri/dijit/Search",
       "dojo/dom",
       "dojo/io-query",
-      "dojo/ready",
-      "dojo/on"
+      "dojo/ready"
     ], function (
-      FeatureLayer, FeatureTable, Search, dom, ioQuery, ready, on
+      FeatureLayer, FeatureTable, Search, dom, ioQuery, ready
     ) {
 
       function getAnchor() {
@@ -103,7 +98,7 @@
         }, "myTableNode");
         myTable.startup();
 
-        // Esri Search Widget with custom logic
+        // Esri Search Widget as requested
         var search = new Search({
           map: null,
           enableButtonMode: false,
@@ -113,20 +108,44 @@
           sources: [
             {
               featureLayer: myFeatureLayer,
-              searchFields: ["City", "County"],
+              searchFields: ["City"],
               displayField: "City",
               exactMatch: false,
               outFields: ["*"],
-              name: "City or County",
-              placeholder: "Search by City or County"
+              name: "City",
+              placeholder: "Search by City"
+            },
+            {
+              featureLayer: myFeatureLayer,
+              searchFields: ["County"],
+              displayField: "County",
+              exactMatch: false,
+              outFields: ["*"],
+              name: "County",
+              placeholder: "Search by County"
             }
           ]
         }, dom.byId("search"));
         search.startup();
 
-        // Custom: When search is submitted, filter the table with combined logic
-        // Listen to search's "search" event (when user presses Enter or suggestion is picked)
-        search.on("search", function(e) {
+        // Filter table on search result selection
+        search.on("select-result", function (e) {
+          var sourceName = e.source.name;
+          var filterExpr = "";
+          if (sourceName === "City") {
+            var city = e.result.feature.attributes.City;
+            var safeCity = city ? city.replace(/'/g, "''") : "";
+            filterExpr = "City = '" + safeCity + "'";
+          } else if (sourceName === "County") {
+            var county = e.result.feature.attributes.County;
+            var safeCounty = county ? county.replace(/'/g, "''") : "";
+            filterExpr = "County = '" + safeCounty + "'";
+          }
+          myFeatureLayer.setDefinitionExpression(filterExpr);
+        });
+
+        // Also filter on Enter (search event)
+        search.on("search", function (e) {
           var searchTerm = e.value;
           if (!searchTerm || !searchTerm.trim()) {
             myFeatureLayer.setDefinitionExpression("");
@@ -134,18 +153,6 @@
           }
           var safeVal = escapeSQL(searchTerm.trim());
           // Combined logic: match City OR County (partial match)
-          var expr = "City LIKE '%" + safeVal + "%' OR County LIKE '%" + safeVal + "%'";
-          myFeatureLayer.setDefinitionExpression(expr);
-        });
-
-        // Also filter on select-result (when user clicks suggestion)
-        search.on("select-result", function(e) {
-          var searchTerm = e.value;
-          if (!searchTerm || !searchTerm.trim()) {
-            myFeatureLayer.setDefinitionExpression("");
-            return;
-          }
-          var safeVal = escapeSQL(searchTerm.trim());
           var expr = "City LIKE '%" + safeVal + "%' OR County LIKE '%" + safeVal + "%'";
           myFeatureLayer.setDefinitionExpression(expr);
         });
