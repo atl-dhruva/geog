@@ -7,7 +7,6 @@
   <link rel="stylesheet" href="https://js.arcgis.com/3.21/dijit/themes/claro/claro.css">
   <link rel="stylesheet" href="https://js.arcgis.com/3.21/esri/css/esri.css">
   <script src="https://js.arcgis.com/3.21/"></script>
-
   <style>
     html,
     body,
@@ -18,72 +17,43 @@
       padding: 0;
       font-family: "Arial", sans-serif;
     }
-
-    #top,
-    #bot {
-      margin: 0;
-      padding: 0;
-    }
-
-    .esri-feature-table-menu {
-      background-color: #fff !important;
-      color: #fff !important;
-    }
-
     th[role="columnheader"] {
       background-color: rgb(32, 60, 76) !important;
       color: #fff !important;
       border-bottom: 2px solid #8DD3EE !important;
     }
-
-    #search {
-      display: block;
+    #searchBarContainer {
       position: absolute;
       z-index: 3;
       top: 20px;
       left: 75px;
-    }
-    .search-label {
-      position: absolute;
-      left: 75px;
-      top: 0;
+      width: 350px;
       background: white;
-      z-index: 4;
-      font-size: 1em;
-      padding: 2px 6px;
-      color: #203c4c;
-      border-radius: 4px 4px 0 0;
-      border-bottom: 1px solid #8DD3EE;
-    }
-    .search-clear-btn {
-      position: absolute;
-      left: 350px;
-      top: 24px;
-      z-index: 4;
-      background: #eee;
-      border: 1px solid #ccc;
-      border-radius: 3px;
-      padding: 2px 8px;
-      cursor: pointer;
+      border-radius: 4px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.05);
+      padding: 7px 10px 7px 2px;
     }
   </style>
 </head>
 
 <body class="claro">
-  <div class="search-label">Combined Filter: Enter City and/or County</div>
-  <div id="search"></div>
-  <button id="clearFilterBtn" class="search-clear-btn">Clear Filters</button>
+  <div id="searchBarContainer">
+    <span style="font-size: 1em; color: #203c4c; margin-right:8px;">Search City or County:</span>
+    <div id="search" style="display:inline-block; width:200px;"></div>
+  </div>
   <div id="myTableNode"></div>
 
   <script>
     require([
       "esri/layers/FeatureLayer",
       "esri/dijit/FeatureTable",
+      "esri/dijit/Search",
       "dojo/dom",
       "dojo/io-query",
-      "dojo/ready"
+      "dojo/ready",
+      "dojo/on"
     ], function (
-      FeatureLayer, FeatureTable, dom, ioQuery, ready
+      FeatureLayer, FeatureTable, Search, dom, ioQuery, ready, on
     ) {
 
       function getAnchor() {
@@ -93,7 +63,7 @@
       }
 
       function getQuery() {
-        return dojo.doc.location.search.slice(1)
+        return dojo.doc.location.search.slice(1);
       }
 
       function getOptions() {
@@ -118,6 +88,7 @@
           return;
         }
 
+        // Create the feature layer
         var myFeatureLayer = new FeatureLayer(options.url, {
           mode: FeatureLayer.MODE_ONDEMAND,
           outFields: options.outFields.split(','),
@@ -132,68 +103,59 @@
         }, "myTableNode");
         myTable.startup();
 
-        // --- Custom Combined Filter UI ---
-        // Build two input boxes for city/county filtering
-        var searchDiv = dom.byId("search");
+        // Esri Search Widget with custom logic
+        var search = new Search({
+          map: null,
+          enableButtonMode: false,
+          enableLabel: false,
+          enableInfoWindow: false,
+          showInfoWindowOnSelect: false,
+          sources: [
+            {
+              featureLayer: myFeatureLayer,
+              searchFields: ["City", "County"],
+              displayField: "City",
+              exactMatch: false,
+              outFields: ["*"],
+              name: "City or County",
+              placeholder: "Search by City or County"
+            }
+          ]
+        }, dom.byId("search"));
+        search.startup();
 
-        // Create City input
-        var cityInput = document.createElement("input");
-        cityInput.type = "text";
-        cityInput.placeholder = "City";
-        cityInput.style.width = "120px";
-        cityInput.style.marginRight = "10px";
-        cityInput.id = "cityInput";
-
-        // Create County input
-        var countyInput = document.createElement("input");
-        countyInput.type = "text";
-        countyInput.placeholder = "County";
-        countyInput.style.width = "120px";
-        countyInput.id = "countyInput";
-
-        // Create Filter button
-        var filterBtn = document.createElement("button");
-        filterBtn.innerText = "Apply Filter";
-        filterBtn.style.marginLeft = "12px";
-        filterBtn.onclick = applyCombinedFilter;
-
-        searchDiv.appendChild(cityInput);
-        searchDiv.appendChild(countyInput);
-        searchDiv.appendChild(filterBtn);
-
-        // Clear button (shown at top for convenience)
-        document.getElementById("clearFilterBtn").onclick = function() {
-          cityInput.value = "";
-          countyInput.value = "";
-          myFeatureLayer.setDefinitionExpression("");
-        };
-
-        // Main filter function
-        function applyCombinedFilter() {
-          var cityVal = cityInput.value.trim();
-          var countyVal = countyInput.value.trim();
-          var clauses = [];
-          if (cityVal.length > 0) {
-            clauses.push("City LIKE '%" + escapeSQL(cityVal) + "%'");
+        // Custom: When search is submitted, filter the table with combined logic
+        // Listen to search's "search" event (when user presses Enter or suggestion is picked)
+        search.on("search", function(e) {
+          var searchTerm = e.value;
+          if (!searchTerm || !searchTerm.trim()) {
+            myFeatureLayer.setDefinitionExpression("");
+            return;
           }
-          if (countyVal.length > 0) {
-            clauses.push("County LIKE '%" + escapeSQL(countyVal) + "%'");
-          }
-          var expr = clauses.join(" AND ");
+          var safeVal = escapeSQL(searchTerm.trim());
+          // Combined logic: match City OR County (partial match)
+          var expr = "City LIKE '%" + safeVal + "%' OR County LIKE '%" + safeVal + "%'";
           myFeatureLayer.setDefinitionExpression(expr);
-        }
-
-        // Allow pressing Enter in either box to filter
-        cityInput.addEventListener("keyup", function(event) {
-          if (event.key === "Enter") applyCombinedFilter();
-        });
-        countyInput.addEventListener("keyup", function(event) {
-          if (event.key === "Enter") applyCombinedFilter();
         });
 
+        // Also filter on select-result (when user clicks suggestion)
+        search.on("select-result", function(e) {
+          var searchTerm = e.value;
+          if (!searchTerm || !searchTerm.trim()) {
+            myFeatureLayer.setDefinitionExpression("");
+            return;
+          }
+          var safeVal = escapeSQL(searchTerm.trim());
+          var expr = "City LIKE '%" + safeVal + "%' OR County LIKE '%" + safeVal + "%'";
+          myFeatureLayer.setDefinitionExpression(expr);
+        });
+
+        // Remove filter when search is cleared
+        search.on("clear-search", function () {
+          myFeatureLayer.setDefinitionExpression("");
+        });
       });
     });
   </script>
 </body>
-
 </html>
