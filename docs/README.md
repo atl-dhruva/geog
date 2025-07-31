@@ -1,4 +1,4 @@
-The purpose of this HTML file is to display Annexation Reports filed with the Georgia Department of Community Affairs prior to the GIS file validation requirements introduced on September 1, 2025.
+The purpose of this HTML file is to display Annexation Reports filed with the Georgia Department of Community Affairs prior to September 1, 2025.
 
 The project folder contains two data files that are referenced by the HTML file:
 
