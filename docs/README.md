@@ -2,7 +2,7 @@ The purpose of this HTML file is to display Annexation Reports filed with the Ge
 
 The project folder contains two data files that are referenced by the HTML file:
 
-  - "georgiacounties.csv" is used to generate a the selection list of Counties that appears in the main view.
+  - "georgiacounties.csv" is used to generate the selection list of Counties that appears in the main view.
  
   - "historicannexations.csv" is used to populate the data table that appears after a County is selected.
 
@@ -10,7 +10,7 @@ The project folder contains two data files that are referenced by the HTML file:
  
   - It's important to keep them in the same project folder as "index.html", otherwise the data won't load properly.
 
-**The data in this file was collected on April 25th, 2025.** I intend to update "historicannexations.csv" with April 25 to September 1 data the day before the new Annexation Reporting system launches on September 1, 2025. I will update this README file as necesseary to reflect updates.
+**The data in this file was collected on April 25th, 2025.** I intend to update "historicannexations.csv" with Apr25-Sep1 data the day before the new Annexation Reporting system launches on September 1, 2025. I will update this README file as necesseary to reflect updates.
 
 This HTML site will be shared via GitHub Pages, then added as an iFrame to the DCA's Annexations Dashboard located within DCA's Annexation Reporting & Resources ArcGIS Hub site.
 
