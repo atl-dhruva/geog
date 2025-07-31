@@ -1,12 +1,16 @@
 The purpose of this HTML file is to display Annexation Reports filed with the Georgia Department of Community Affairs prior to the GIS file validation requirements introduced on September 1, 2025.
 
 The project folder contains two data files that are referenced by the HTML file:
+
   - "georgiacounties.csv" is used to generate a the selection list of Counties that appears in the main view.
+ 
   - "historicannexations.csv" is used to populate the data table that appears after a County is selected.
+
   - Both of these .csv files can be updated as needed. Simply update the data in GitHub & press "Commit Changes".
+ 
   - It's important to keep them in the same project folder as "index.html", otherwise the data won't load properly.
 
-The data in this file was collected on April 25th, 2025. I intend to update "historicannexations.csv" with April 25 to September 1 data the day before the new Annexation Reporting system launches on September 1, 2025. I will update this README file as necesseary to reflect updates.
+**The data in this file was collected on April 25th, 2025.** I intend to update "historicannexations.csv" with April 25 to September 1 data the day before the new Annexation Reporting system launches on September 1, 2025. I will update this README file as necesseary to reflect updates.
 
 This HTML site will be shared via GitHub Pages, then added as an iFrame to the DCA's Annexations Dashboard located within DCA's Annexation Reporting & Resources ArcGIS Hub site.
 
@@ -39,20 +43,30 @@ You will need to set up a Local HTTP Server on your computer to test the .html f
 
   4. Enter the following command in the Command Prompt: "python3 -m http.server -b 127.0.0.42 8080" (no quotes)
      
-  6. Open a web browser and enter the following (as if you were trying to go to a website):
+  5. Open a web browser and enter the following (as if you were trying to go to a website):
      "http://127.0.0.42:8080" (no quotes).
 
 **You should see the Historic Annexation Table web app in your browser at this point.**
 
-  7. Navigate back to your Windows File Explorer folder called "historicannexations"
-  8. Right-click "index.html" and choose "Edit in Notepad". (If you don't see this option, try "Open with > Notepad")
-  9. You can directly change the HTML, CSS, or JavaScript in this file.
-  10. Press "Save", then refresh your browser at "http://127.0.0.42:8080" to preview the edits.
-  11. When you're happy with the edits, use GitHub to suggest the modifications to atl-dhruva using a pull request.
-
-**What to do if atl-dhruva is not available to push the updates you made**
+  6. Navigate back to your Windows File Explorer folder called "historicannexations"
+ 
+  7. Right-click "index.html" and choose "Edit in Notepad". (If you don't see this option, try "Open with > Notepad")
   
-  12. Feel free to upload a clone of the modified "historicannex" project folder to your own account.
-  13. To make the HTML page viewable on DCA's Annexations Hub, you need to share your project using GitHub Pages.
-  14. You then need to use the URL of your Github Page as an iFrame in the Annexations Hub.
-  15. There should already be an iFrame with atl-dhruva's GitHub Pages link; just substitute it for yours.
+  8. You can directly change the HTML, CSS, or JavaScript in this file.
+  
+  9. Press "Save", then refresh your browser at "http://127.0.0.42:8080" to preview the edits.
+  
+  10. When you're happy with the edits, use GitHub to suggest the modifications to atl-dhruva using a pull request.
+
+**What to do if atl-dhruva is not available to push updates**
+  
+  11. Feel free to upload a clone of the modified "historicannex" project folder to your own account.
+  
+  12. To make the HTML page viewable on DCA's Annexations Hub, you need to share your project using GitHub Pages.
+  
+  13. You then need to use the URL of your Github Page as an iFrame in the Annexations Hub.
+  
+  14. There should already be an iFrame with atl-dhruva's GitHub Pages link; just substitute it for yours.
+
+**Contact**
+gis@dca.ga.gov
