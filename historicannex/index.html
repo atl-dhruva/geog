@@ -3,13 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <title>Georgia Counties</title>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
+        html, body {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+        }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: #f8f9fa;
             margin: 0;
-            padding: 0;
+            min-height: 100vh;
+            box-sizing: border-box;
         }
         header {
             background: #2c3e50;
@@ -18,36 +24,93 @@
             text-align: center;
         }
         main {
-            max-width: 700px;
-            margin: 2em auto;
+            min-height: 100vh;
+            margin: 0 auto;
             background: #fff;
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(44,62,80,0.08);
-            padding: 2em;
+            padding: 2em 1em 2em 1em;
+            max-width: 1050px;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
         }
         ul#counties-list {
             display: flex;
             flex-wrap: wrap;
-            gap: 16px;
+            gap: 10px;
             list-style: none;
             padding: 0;
-            margin: 0;
-            justify-content: space-evenly;
+            margin: 0 0 2em 0;
+            justify-content: space-between;
+            width: 100%;
         }
         ul#counties-list li {
+            flex: 1 0 120px;
+            margin: 0;
+            padding: 0;
+        }
+        ul#counties-list a {
+            display: block;
             background: #e1ecf4;
             color: #24476c;
-            padding: 0.75em 1.5em;
+            padding: 0.45em 0.9em;
             border-radius: 6px;
-            font-size: 1.1em;
-            flex: 1 0 180px;
+            font-size: 0.66em;
             text-align: center;
             box-shadow: 0 1px 2px rgba(44,62,80,0.06);
+            text-decoration: none;
+            transition: background 0.2s, color 0.2s;
+        }
+        ul#counties-list a:hover, ul#counties-list a:focus {
+            background: #b8d6f4;
+            color: #16324a;
         }
         #error-message {
             color: #d32f2f;
             text-align: center;
             margin-top: 1em;
+        }
+        #results-table-container {
+            width: 100%;
+            overflow-x: auto;
+            margin-top: 2em;
+            display: none;
+	    font-size: 0.75em;
+        }
+        #results-table-container.active {
+            display: block;
+        }
+        table {
+            border-collapse: collapse;
+            width: 100%;
+            margin-top: 1em;
+            font-size: 1em;
+        }
+        th, td {
+            border: 1px solid #bcd5ea;
+            padding: 0.5em 1em;
+            text-align: left;
+        }
+        th {
+            background: #e1ecf4;
+            cursor: pointer;
+            user-select: none;
+        }
+        tr:nth-child(even) {
+            background: #f5f8fa;
+        }
+        .sort-handle {
+            font-size: 0.85em;
+            margin-left: 0.35em;
+            cursor: pointer;
+            color: #24476c;
+        }
+        .sort-handle.active {
+            color: #d32f2f;
+        }
+        .no-sort {
+            cursor: default;
         }
     </style>
 </head>
@@ -60,16 +123,64 @@
             <!-- County names will be inserted here -->
         </ul>
         <div id="error-message"></div>
+        <div id="results-table-container"></div>
     </main>
     <script>
-        // Helper to parse simple CSV with one column, ignoring header
+        // Helper to parse simple CSV into array of objects
         function parseCSV(csvText) {
-            // Handle CRLF/newlines, remove empty lines, and header
+            let lines = csvText.trim().split(/\r?\n/);
+            if (lines.length < 2) return [];
+            const headers = lines[0].split(',').map(h => h.trim());
+            return lines.slice(1).map(line => {
+                const vals = line.split(',').map(v => v.trim());
+                let obj = {};
+                headers.forEach((h, i) => obj[h] = vals[i]);
+                return obj;
+            });
+        }
+
+        // For counties, parse as simple list
+        function parseCountiesCSV(csvText) {
             let lines = csvText.trim().split(/\r?\n/);
             if (lines.length && lines[0].toLowerCase().includes('county')) {
                 lines = lines.slice(1);
             }
             return lines.map(l => l.trim()).filter(Boolean);
+        }
+
+        // Get URL parameters or fragment and return as object
+        function getParams() {
+            const params = {};
+            const query = window.location.search.substring(1) || window.location.hash.substring(1);
+            query.split('&').forEach(pair => {
+                if (!pair) return;
+                const [k, v] = pair.split('=');
+                params[decodeURIComponent(k)] = decodeURIComponent(v || '');
+            });
+            return params;
+        }
+
+        // Set URL fragment parameters programmatically
+        function setRequiredParams(headers, hiddenFields=[]) {
+            const params = getParams();
+            let changed = false;
+            if (!params.url || params.url !== 'historicannexations.csv') {
+                params.url = 'historicannexations.csv';
+                changed = true;
+            }
+            // outFields: all headers, hiddenFields: in hiddenFields
+            const outFieldsArr = headers.slice();
+            params.outFields = outFieldsArr.join(',');
+            if (!('hiddenFields' in params) || params.hiddenFields !== hiddenFields.join(',')) {
+                params.hiddenFields = hiddenFields.join(',');
+                changed = true;
+            }
+            if (changed) {
+                const newHash = Object.entries(params).map(([k, v]) =>
+                    encodeURIComponent(k) + '=' + encodeURIComponent(v)
+                ).join('&');
+                window.location.hash = newHash;
+            }
         }
 
         async function loadCounties() {
@@ -79,20 +190,194 @@
                 const resp = await fetch('georgiacounties.csv');
                 if (!resp.ok) throw new Error('Could not load CSV');
                 const text = await resp.text();
-                const counties = parseCSV(text);
+                const counties = parseCountiesCSV(text);
                 if (counties.length === 0) {
                     errorMsg.textContent = 'No counties found in the CSV file.';
                     return;
                 }
                 list.innerHTML = counties.map(county =>
-                    `<li>${county}</li>`
+                    `<li><a href="#" data-county="${encodeURIComponent(county)}">${county}</a></li>`
                 ).join('');
+                list.querySelectorAll('a').forEach(link => {
+                    link.addEventListener('click', function(evt) {
+                        evt.preventDefault();
+                        showFilteredTable(decodeURIComponent(this.dataset.county));
+                    });
+                });
             } catch (e) {
                 errorMsg.textContent = 'Failed to load county list. Make sure georgiacounties.csv is present.';
             }
         }
 
-        document.addEventListener('DOMContentLoaded', loadCounties);
+        // Fields that should NOT have sort handles
+        const noSortFields = [
+            "Authorization Number", "Authorization Type", "Acreage", "Comments", "AnnexID"
+        ];
+        // Fields that should be sorted as Dates
+        const dateFields = [
+            "Ordinance Date", "Effective Date", "Report Date"
+        ];
+
+        // Sort utility
+        function sortRows(rows, key, dir) {
+            // Date-type sort
+            if (dateFields.includes(key)) {
+                return rows.slice().sort((a, b) => {
+                    let dateA = a[key] && Date.parse(a[key]) ? new Date(a[key]) : new Date(0);
+                    let dateB = b[key] && Date.parse(b[key]) ? new Date(b[key]) : new Date(0);
+                    if (dateA < dateB) return dir === "asc" ? -1 : 1;
+                    if (dateA > dateB) return dir === "asc" ? 1 : -1;
+                    return 0;
+                });
+            }
+            // Numeric sort for "Date Order"
+            if (key === "Date Order") {
+                let numA, numB;
+                return rows.slice().sort((a, b) => {
+                    numA = Number(a[key]), numB = Number(b[key]);
+                    if (!isNaN(numA) && !isNaN(numB)) {
+                        return dir === "asc" ? numA - numB : numB - numA;
+                    }
+                    // fallback to string
+                    const valA = (a[key] || '').toLowerCase();
+                    const valB = (b[key] || '').toLowerCase();
+                    if (valA < valB) return dir === "asc" ? -1 : 1;
+                    if (valA > valB) return dir === "asc" ? 1 : -1;
+                    return 0;
+                });
+            }
+            // Fallback: string compare
+            return rows.slice().sort((a, b) => {
+                const valA = (a[key] || '').toLowerCase();
+                const valB = (b[key] || '').toLowerCase();
+                if (valA < valB) return dir === "asc" ? -1 : 1;
+                if (valA > valB) return dir === "asc" ? 1 : -1;
+                return 0;
+            });
+        }
+
+        // Table render and interaction
+        function renderTable(container, rows, headers, hiddenFields, sortKey, sortDir) {
+            if (!rows.length) {
+                container.innerHTML += `<em>No data to display.</em>`;
+                return;
+            }
+            // Only show fields not in hiddenFields
+            const shownHeaders = headers.filter(h => !hiddenFields.includes(h));
+            let html = `<table><thead><tr>`;
+            shownHeaders.forEach(h => {
+                if (noSortFields.includes(h)) {
+                    html += `<th class="no-sort">${h}</th>`;
+                } else {
+                    const up = sortKey === h && sortDir === 'asc' ? '▲' : '△';
+                    const down = sortKey === h && sortDir === 'desc' ? '▼' : '▽';
+                    html += `<th data-field="${h}">
+                        ${h}
+                        <span class="sort-handle ${sortKey===h&&sortDir==='asc'?'active':''}" data-dir="asc">${up}</span>
+                        <span class="sort-handle ${sortKey===h&&sortDir==='desc'?'active':''}" data-dir="desc">${down}</span>
+                    </th>`;
+                }
+            });
+            html += `</tr></thead><tbody>`;
+            rows.forEach(row => {
+                html += '<tr>';
+                shownHeaders.forEach(h => {
+                    html += `<td>${row[h] || ''}</td>`;
+                });
+                html += '</tr>';
+            });
+            html += '</tbody></table>';
+            container.innerHTML += html;
+
+            // Add sort handlers
+            container.querySelectorAll('.sort-handle').forEach(handle => {
+                handle.addEventListener('click', function() {
+                    const field = this.closest('th').dataset.field;
+                    const dir = this.dataset.dir;
+                    // Remove table and rerender so only one table is shown
+                    container.innerHTML = container.innerHTML.split('<table')[0];
+                    renderTable(
+                        container,
+                        sortRows(rows, field, dir),
+                        headers,
+                        hiddenFields,
+                        field,
+                        dir
+                    );
+                });
+            });
+        }
+
+        async function showFilteredTable(countyName) {
+            const container = document.getElementById('results-table-container');
+            const errorMsg = document.getElementById('error-message');
+            errorMsg.textContent = '';
+            container.innerHTML = '<em>Loading data...</em>';
+            container.classList.add('active');
+            try {
+                const resp = await fetch('historicannexations.csv');
+                if (!resp.ok) throw new Error('Could not load historic data');
+                const text = await resp.text();
+                const rows = parseCSV(text);
+
+                if (!rows.length) {
+                    container.innerHTML = `<em>No data found in historicannexations.csv.</em>`;
+                    return;
+                }
+
+                // Use "Date Order" as hidden field
+                const headers = Object.keys(rows[0]);
+                const hiddenFields = headers.includes("Date Order") ? ["Date Order"] : [];
+                setRequiredParams(headers, hiddenFields);
+
+                // Filter for county
+                const filtered = rows.filter(row =>
+                    row['County'] &&
+                    row['County'].toLowerCase().includes(countyName.toLowerCase())
+                );
+
+                if (filtered.length === 0) {
+                    container.innerHTML = `<em>No results for <strong>${countyName}</strong></em>`;
+                    return;
+                }
+
+                // Sort by "Date Order" ascending by default (numeric if possible)
+                let sortKey = "Date Order";
+                let sortDir = "asc";
+                let shownRows = filtered;
+                if (headers.includes("Date Order")) {
+                    shownRows = sortRows(filtered, sortKey, sortDir);
+                }
+
+                // Title
+                let html = `<h2>${countyName} Annexation History</h2>`;
+                container.innerHTML = html;
+                renderTable(container, shownRows, headers, hiddenFields, sortKey, sortDir);
+                container.classList.add('active');
+                container.scrollIntoView({behavior: "smooth"});
+            } catch (e) {
+                errorMsg.textContent = 'Failed to load or parse historicannexations.csv.';
+                container.innerHTML = '';
+                container.classList.remove('active');
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', async () => {
+            // On load, ensure URL has required parameters for external dependencies
+            try {
+                const resp = await fetch('historicannexations.csv');
+                if (resp.ok) {
+                    const text = await resp.text();
+                    let lines = text.trim().split(/\r?\n/);
+                    if (lines.length) {
+                        const headers = lines[0].split(',').map(h => h.trim());
+                        setRequiredParams(headers, headers.includes("Date Order") ? ["Date Order"] : []);
+                    }
+                }
+            } catch (e) {}
+            loadCounties();
+            document.getElementById('results-table-container').classList.remove('active');
+        });
     </script>
 </body>
 </html>
