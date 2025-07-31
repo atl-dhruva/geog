@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Georgia Counties</title>
+    <title>Historical Annexations in Georgia</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <style>
         html, body {
@@ -18,7 +18,7 @@
             box-sizing: border-box;
         }
         header {
-            background: #2c3e50;
+            background: #1B3A4D;
             color: #fff;
             padding: 1em;
             text-align: center;
@@ -34,7 +34,14 @@
             display: flex;
             flex-direction: column;
             align-items: stretch;
+	    text-align: center;
         }
+	footer {
+            background: #1B3A4D;
+            color: #fff;
+            padding: 1em;
+            text-align: center;
+	}
         ul#counties-list {
             display: flex;
             flex-wrap: wrap;
@@ -116,9 +123,11 @@
 </head>
 <body>
     <header>
-        <h1>Georgia Counties</h1>
+	<h1>Historical Annexations in Georgia</h1>
+       	<p>O.C.G.A § 36-36-3 (2024) states that annexation reports filed with the Georgia Department of Community Affairs must include a GIS file.<br> To assist local governments with compliance, the Department of Community Affairs released a web-based annexation reporting system.<br> The records in the table below represent reports filed with Georgia DCA prior to the system's release date: September 1, 2025.</p>
     </header>
     <main>
+	<h3>Select a County</h3>
         <ul id="counties-list">
             <!-- County names will be inserted here -->
         </ul>
@@ -379,5 +388,10 @@
             document.getElementById('results-table-container').classList.remove('active');
         });
     </script>
+    <footer>
+	<h5>Contact:</h5>
+	<p>Arbitration assistance: planning@dca.ga.gov<br>Data requests: gis@dca.ga.gov</p><br>
+    </footer>
+   
 </body>
 </html>
