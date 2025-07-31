@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Georgia Counties</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f8f9fa;
+            margin: 0;
+            padding: 0;
+        }
+        header {
+            background: #2c3e50;
+            color: #fff;
+            padding: 1em;
+            text-align: center;
+        }
+        main {
+            max-width: 700px;
+            margin: 2em auto;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(44,62,80,0.08);
+            padding: 2em;
+        }
+        ul#counties-list {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 16px;
+            list-style: none;
+            padding: 0;
+            margin: 0;
+            justify-content: space-evenly;
+        }
+        ul#counties-list li {
+            background: #e1ecf4;
+            color: #24476c;
+            padding: 0.75em 1.5em;
+            border-radius: 6px;
+            font-size: 1.1em;
+            flex: 1 0 180px;
+            text-align: center;
+            box-shadow: 0 1px 2px rgba(44,62,80,0.06);
+        }
+        #error-message {
+            color: #d32f2f;
+            text-align: center;
+            margin-top: 1em;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Georgia Counties</h1>
+    </header>
+    <main>
+        <ul id="counties-list">
+            <!-- County names will be inserted here -->
+        </ul>
+        <div id="error-message"></div>
+    </main>
+    <script>
+        // Helper to parse simple CSV with one column, ignoring header
+        function parseCSV(csvText) {
+            // Handle CRLF/newlines, remove empty lines, and header
+            let lines = csvText.trim().split(/\r?\n/);
+            if (lines.length && lines[0].toLowerCase().includes('county')) {
+                lines = lines.slice(1);
+            }
+            return lines.map(l => l.trim()).filter(Boolean);
+        }
+
+        async function loadCounties() {
+            const list = document.getElementById('counties-list');
+            const errorMsg = document.getElementById('error-message');
+            try {
+                const resp = await fetch('georgiacounties.csv');
+                if (!resp.ok) throw new Error('Could not load CSV');
+                const text = await resp.text();
+                const counties = parseCSV(text);
+                if (counties.length === 0) {
+                    errorMsg.textContent = 'No counties found in the CSV file.';
+                    return;
+                }
+                list.innerHTML = counties.map(county =>
+                    `<li>${county}</li>`
+                ).join('');
+            } catch (e) {
+                errorMsg.textContent = 'Failed to load county list. Make sure georgiacounties.csv is present.';
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', loadCounties);
+    </script>
+</body>
+</html>
