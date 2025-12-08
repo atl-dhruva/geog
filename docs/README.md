@@ -20,9 +20,9 @@ If you wish to test out updates to the HTML file before committing changes, foll
 
 **SECTION 1 - INSTALLING PYTHON**
 
-I'll walk you through installing Python in Section 1. If you already have Python, skip to Section 2.
+We will walk through installing Python in Section 1. If you already have Python, skip to Section 2.
 
-  1. Open a Command Prompt on your computer. You can use your Windows Search to open it - search for "Command Prompt".
+  1.  Use Windows Search to open a new Command Prompt window.
    
   2. Type "python" (no quotes) in your Command Prompt. Press Enter.
    
@@ -64,9 +64,9 @@ You will need to set up a Local HTTP Server on your computer to test the .html f
   
   12. To make the HTML page viewable on DCA's Annexations Hub, you need to share your project using GitHub Pages.
   
-  13. You then need to use the URL of your Github Page as an iFrame in the Annexations Hub.
+  13. Then, use the URL of your Github Page as an iFrame in the Annexations Hub.
   
-  14. There should already be an iFrame with atl-dhruva's GitHub Pages link; just substitute it for yours.
+  14. Subsititute the new URL for the old link to atl-dhruva's GitHub Pages.
 
 **Contact**
 gis@dca.ga.gov
