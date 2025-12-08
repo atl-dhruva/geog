@@ -38,10 +38,11 @@ You will need to set up a Local HTTP Server on your computer to test the .html f
      
   2. Open the "historicannex" folder on your computer using Windows File Explorer.
      
-  3. In the Search Bar at the top of your File Explorer, type "cmd" (no quotes) and press enter to open the command prompt.
-     **(Make sure the command prompt is in the "historicannex" folder.** You should see its name in the command prompt.)
+  3. Overwrite the Search Bar at the top of your File Explorer by typing "cmd" (no quotes). Press enter to open the command prompt.
+     **(Confirm that the command prompt is in the "historicannex" folder** - you'll see the words "historicannex" displayed in the prompt.)
 
-  4. Enter the following command in the Command Prompt: "python3 -m http.server -b 127.0.0.42 8080" (no quotes)
+  4. Enter the following command in the Command Prompt: "python -m http.server -b 127.0.0.42 8080" (no quotes)
+     Note: on the off-chance that the first keyword ("python") doesn't work, try typing "python3" instead.
      
   5. Open a web browser and enter the following (as if you were trying to go to a website):
      "http://127.0.0.42:8080" (no quotes).
