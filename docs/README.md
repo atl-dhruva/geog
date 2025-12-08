@@ -65,9 +65,9 @@ You will need to set up a Local HTTP Server on your computer to test the .html f
   
   12. To make the HTML page viewable on DCA's Annexations Hub, you need to share your project using GitHub Pages.
   
-  13. Then, use the URL of your Github Page as an iFrame in the Annexations Hub.
+  13. You can use the URL of your Github Page as an iFrame in the Annexations Hub. Open the Hub in Edit Mode in ArcGIS Portal / Online.
   
-  14. Subsititute the new URL for the old link to atl-dhruva's GitHub Pages.
+  14. Replace the link to atl-dhruva's Github Pages with the URL linking to your updated Github Pages project.
 
 **Contact**
 gis@dca.ga.gov
