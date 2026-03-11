@@ -149,7 +149,7 @@
                 return obj;
             });
         }
-
+		
         // For counties, parse as simple list
         function parseCountiesCSV(csvText) {
             let lines = csvText.trim().split(/\r?\n/);
@@ -159,6 +159,25 @@
             return lines.map(l => l.trim()).filter(Boolean);
         }
 
+		// isURL helper function
+		function isURL(str) {
+    		try {
+        		new URL(str);
+        		return true;
+    		} catch {
+        		return false;
+    		}
+		}
+
+// modifications around line 293-299
+// Assuming 'tableData' is an array of arrays representing the table's rows and cells
+for (let i = 0; i < tableData.length; i++) {
+    for (let j = 0; j < tableData[i].length; j++) {
+        if (isURL(tableData[i][j])) {
+            tableData[i][j] = `<a href='${tableData[i][j]}' target='_blank' rel='noopener noreferrer'>${tableData[i][j]}</a>`;
+        }
+    }
+}
         // Get URL parameters or fragment and return as object
         function getParams() {
             const params = {};
