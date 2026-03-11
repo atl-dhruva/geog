@@ -159,16 +159,6 @@
             return lines.map(l => l.trim()).filter(Boolean);
         }
 
-		// isURL helper function
-		function isURL(str) {
-    		try {
-        		new URL(str);
-        		return true;
-    		} catch {
-        		return false;
-    		}
-		}
-
 // modifications around line 293-299
 // Assuming 'tableData' is an array of arrays representing the table's rows and cells
 for (let i = 0; i < tableData.length; i++) {
