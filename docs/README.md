@@ -41,6 +41,11 @@ If this is new for you, don't worry - it's easy! You only need to use one line o
   9. Press "Save", then refresh your browser at "http://127.0.0.42:8080" to preview the edits.
   10. When you're happy with the edits, use GitHub to suggest the modifications using a pull request.
 
+**How the attachments are handled**
+The Attachments column contains URLs pointing to the Georgia Geospatial Information Office's ArcGIS portal.
+The documents are securely stored on GIO's ArcGIS Server, and can be accessed through a feature service.
+DCA GIS has read-write permission on the feature service. The general public has read-only access (note: downloads are enabled.)
+
 **What to do if admin is not available to push updates**
   
   11. Feel free to upload a clone of the modified "historicannex" project folder to your own account.
